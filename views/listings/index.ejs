@@ -1,0 +1,86 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="listings-page">
+  <% const features = ["Wifi","Furnished","Private Kitchen","Attached Bathroom","Single Room","Double Sharing","Independent","Within 1km"]; %>
+  <% const featureIcons = {
+    "Wifi": "fa-solid fa-wifi",
+    "Furnished": "fa-solid fa-couch",
+    "Private Kitchen": "fa-solid fa-kitchen-set",
+    "Attached Bathroom": "fa-solid fa-bath",
+    "Single Room": "fa-solid fa-bed",
+    "Double Sharing": "fa-solid fa-users",
+    "Independent": "fa-solid fa-house-user",
+    "Within 1km": "fa-solid fa-location-dot"
+  }; %>
+  <% const featureColors = {
+    "Wifi": "#7c3aed",
+    "Furnished": "#2563eb",
+    "Private Kitchen": "#dc2626",
+    "Attached Bathroom": "#0891b2",
+    "Single Room": "#d97706",
+    "Double Sharing": "#16a34a",
+    "Independent": "#7c3aed",
+    "Within 1km": "#db2777"
+  }; %>
+
+  <div class="filter-strip">
+    <div class="filter-scroll">
+      <a href="/listings" class="filter-chip">
+        <i class="fa-solid fa-th-large"></i>
+        <span>All</span>
+      </a>
+      <% for (let feature of features) { %>
+        <a href="/listings?feature=<%= encodeURIComponent(feature) %>" class="filter-chip">
+          <i class="<%= featureIcons[feature] %>"></i>
+          <span><%= feature %></span>
+        </a>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="container py-4">
+    <% if (search) { %>
+      <div class="search-result-header mb-4">
+        <h4>Results for "<strong><%= search %></strong>"</h4>
+        <a href="/listings" class="clear-search"><i class="fa-solid fa-xmark me-1"></i>Clear</a>
+      </div>
+    <% } %>
+
+    <% if (allListings.length === 0) { %>
+      <div class="empty-state text-center py-5">
+        <i class="fa-solid fa-house-circle-xmark empty-icon mb-3"></i>
+        <h4>No listings found</h4>
+        <p class="text-muted">Try adjusting your filters or search term.</p>
+        <a href="/listings" class="btn-primary-pill mt-3">View All Listings</a>
+      </div>
+    <% } else { %>
+      <div class="listings-grid">
+        <% for (let listing of allListings) { %>
+          <a href="/listings/<%= listing._id %>" class="listing-card-link">
+            <div class="listing-card">
+              <div class="listing-img-wrap">
+                <img src="<%= listing.image.url %>" alt="<%= listing.title %>" class="listing-img" loading="lazy">
+                <% if (listing.features && listing.features.length > 0) { %>
+                  <div class="listing-badge"><%= listing.features[0] %></div>
+                <% } %>
+              </div>
+              <div class="listing-info">
+                <div class="listing-title-row">
+                  <h6 class="listing-title"><%= listing.title %></h6>
+                </div>
+                <div class="listing-location">
+                  <i class="fa-solid fa-location-dot"></i>
+                  <%= listing.location || "Location TBD" %><% if (listing.country) { %>, <%= listing.country %><% } %>
+                </div>
+                <div class="listing-price-row">
+                  <span class="listing-price">₹<%= listing.price ? listing.price.toLocaleString("en-IN") : "—" %></span>
+                  <span class="listing-per-night">/ night</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+</div>

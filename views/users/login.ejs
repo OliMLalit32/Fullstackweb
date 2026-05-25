@@ -1,0 +1,79 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo">
+        <i class="fa-solid fa-house-chimney"></i>
+      </div>
+      <h2>Welcome Back</h2>
+      <p class="text-muted">Sign in to your ApnaGhar account</p>
+    </div>
+
+    <% if (role) { %>
+    <div class="role-tabs mb-4">
+      <a href="/login?role=client" class="role-tab <%= (!role || role === 'client') ? 'active' : '' %>">
+        <i class="fa-solid fa-user me-1"></i>Client
+      </a>
+      <a href="/login?role=owner" class="role-tab <%= role === 'owner' ? 'active' : '' %>">
+        <i class="fa-solid fa-building me-1"></i>Owner
+      </a>
+    </div>
+    <% } %>
+
+    <form action="/login" method="POST" class="needs-validation auth-form" novalidate>
+      <div class="form-group-modern mb-4">
+        <label class="form-label-modern">Username</label>
+        <div class="input-modern">
+          <i class="fa-solid fa-user input-icon"></i>
+          <input name="username" type="text" class="form-control-modern" placeholder="Enter your username" required>
+        </div>
+      </div>
+      <div class="form-group-modern mb-4">
+        <label class="form-label-modern">Password</label>
+        <div class="input-modern">
+          <i class="fa-solid fa-lock input-icon"></i>
+          <input name="password" id="password" type="password" class="form-control-modern" placeholder="Enter your password" required>
+          <button type="button" class="toggle-pwd" onclick="togglePwd('password')">
+            <i class="fa-solid fa-eye" id="eye-password"></i>
+          </button>
+        </div>
+      </div>
+      <button type="submit" class="btn-auth-primary w-100">
+        <i class="fa-solid fa-right-to-bracket me-2"></i>Sign In
+      </button>
+    </form>
+
+    <div class="auth-divider"><span>OR</span></div>
+
+    <div class="auth-role-btns">
+      <a href="/login?role=client" class="btn-role-select <%= (!role || role === 'client') ? 'selected' : '' %>">
+        <i class="fa-solid fa-user me-2"></i>Login as Client
+      </a>
+      <a href="/login?role=owner" class="btn-role-select <%= role === 'owner' ? 'selected' : '' %>">
+        <i class="fa-solid fa-building me-2"></i>Login as Owner
+      </a>
+    </div>
+
+    <div class="auth-footer mt-4">
+      <p>Don't have an account? 
+        <a href="/signup?role=<%= role || 'client' %>">Sign up here</a>
+      </p>
+      <p><a href="/signup?role=owner">Register as a Property Owner</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePwd(id) {
+  const input = document.getElementById(id);
+  const icon = document.getElementById('eye-' + id);
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.replace('fa-eye', 'fa-eye-slash');
+  } else {
+    input.type = 'password';
+    icon.classList.replace('fa-eye-slash', 'fa-eye');
+  }
+}
+</script>

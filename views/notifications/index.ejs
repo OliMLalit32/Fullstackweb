@@ -1,0 +1,82 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="dashboard-page">
+  <div class="container py-4">
+    <div class="page-header mb-4">
+      <h3><i class="fa-solid fa-bell me-2 text-purple"></i>Notifications</h3>
+      <% if (notifications.some(n => !n.read)) { %>
+        <form method="POST" action="/notifications/mark-all-read">
+          <button class="btn-primary-pill">Mark All Read</button>
+        </form>
+      <% } %>
+    </div>
+
+    <% if (notifications.length === 0) { %>
+      <div class="empty-state text-center py-5">
+        <i class="fa-solid fa-bell-slash empty-icon mb-3"></i>
+        <h5>No notifications yet</h5>
+        <p class="text-muted">You're all caught up!</p>
+      </div>
+    <% } else { %>
+      <div class="notifications-list">
+        <% for (let n of notifications) { %>
+          <div class="notif-item <%= n.read ? '' : 'notif-unread' %>" 
+               onclick="markRead('<%= n._id %>')"
+               data-id="<%= n._id %>">
+            <div class="notif-icon-wrap">
+              <% if (n.type === 'booking_confirmed') { %>
+                <i class="fa-solid fa-check-circle text-success"></i>
+              <% } else if (n.type === 'booking_rejected') { %>
+                <i class="fa-solid fa-times-circle text-danger"></i>
+              <% } else if (n.type === 'booking_request') { %>
+                <i class="fa-solid fa-calendar-plus text-warning"></i>
+              <% } else if (n.type === 'booking_cancelled') { %>
+                <i class="fa-solid fa-ban text-secondary"></i>
+              <% } else if (n.type === 'payment_confirmed') { %>
+                <i class="fa-solid fa-credit-card text-success"></i>
+              <% } else { %>
+                <i class="fa-solid fa-bell text-purple"></i>
+              <% } %>
+            </div>
+            <div class="notif-content">
+              <div class="notif-title"><%= n.title %></div>
+              <div class="notif-message text-muted"><%= n.message %></div>
+              <div class="notif-time small text-muted mt-1">
+                <i class="fa-regular fa-clock me-1"></i>
+                <%= new Date(n.createdAt).toLocaleString("en-IN") %>
+              </div>
+            </div>
+            <% if (!n.read) { %>
+              <div class="notif-dot"></div>
+            <% } %>
+            <% if (n.link) { %>
+              <a href="<%= n.link %>" class="notif-action" onclick="event.stopPropagation()">
+                <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<script>
+async function markRead(id) {
+  try {
+    await fetch('/notifications/' + id + '/read', { method: 'POST' });
+    const el = document.querySelector(`[data-id="${id}"]`);
+    if (el) {
+      el.classList.remove('notif-unread');
+      const dot = el.querySelector('.notif-dot');
+      if (dot) dot.remove();
+    }
+    const badge = document.getElementById('notif-badge');
+    if (badge) {
+      const count = Math.max(0, parseInt(badge.textContent) - 1);
+      badge.textContent = count;
+      if (count === 0) badge.classList.add('d-none');
+    }
+  } catch(e) {}
+}
+</script>

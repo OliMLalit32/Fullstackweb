@@ -1,0 +1,64 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="dashboard-page">
+  <div class="container py-4">
+    <div class="page-header mb-4">
+      <h3><i class="fa-solid fa-calendar-check me-2 text-purple"></i>My Bookings</h3>
+      <a href="/listings" class="btn-primary-pill">
+        <i class="fa-solid fa-search me-1"></i>Find More Properties
+      </a>
+    </div>
+
+    <% if (bookings.length === 0) { %>
+      <div class="empty-state text-center py-5">
+        <i class="fa-solid fa-calendar-xmark empty-icon mb-3"></i>
+        <h5>No bookings yet</h5>
+        <p class="text-muted">Start exploring and book your first rental!</p>
+        <a href="/listings" class="btn-primary-pill mt-2">Browse Listings</a>
+      </div>
+    <% } else { %>
+      <div class="bookings-list">
+        <% for (let b of bookings) { %>
+          <div class="booking-list-card">
+            <div class="booking-list-img">
+              <% if (b.listing && b.listing.image) { %>
+                <img src="<%= b.listing.image.url %>" alt="">
+              <% } else { %>
+                <div class="no-img-placeholder"><i class="fa-solid fa-home"></i></div>
+              <% } %>
+            </div>
+            <div class="booking-list-info">
+              <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                <div>
+                  <h6 class="mb-1 fw-700"><%= b.listing ? b.listing.title : 'Listing Removed' %></h6>
+                  <div class="text-muted small"><i class="fa-solid fa-location-dot me-1"></i><%= b.listing ? b.listing.location : '—' %></div>
+                </div>
+                <span class="status-badge status-<%= b.status %>">
+                  <%= b.status.charAt(0).toUpperCase() + b.status.slice(1) %>
+                </span>
+              </div>
+              <div class="booking-dates mt-2">
+                <span><i class="fa-solid fa-calendar-day me-1 text-purple"></i><%= new Date(b.checkIn).toDateString() %></span>
+                <i class="fa-solid fa-arrow-right mx-2 text-muted"></i>
+                <span><i class="fa-solid fa-calendar-check me-1 text-purple"></i><%= new Date(b.checkOut).toDateString() %></span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap gap-2">
+                <div>
+                  <span class="fw-700 text-purple">₹<%= b.totalAmount.toLocaleString("en-IN") %></span>
+                  <span class="text-muted ms-2 small">
+                    <% if (b.paymentConfirmed) { %>
+                      <i class="fa-solid fa-circle-check text-success me-1"></i>Payment Confirmed
+                    <% } else { %>
+                      <i class="fa-solid fa-clock text-warning me-1"></i>Payment Pending
+                    <% } %>
+                  </span>
+                </div>
+                <a href="/bookings/<%= b._id %>/confirmation" class="btn-view-booking">View Details</a>
+              </div>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+</div>

@@ -1,0 +1,118 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="form-page">
+  <div class="form-card confirmation-card">
+    
+    <% if (booking.status === 'confirmed') { %>
+      <div class="confirmation-success text-center mb-4">
+        <div class="success-circle"><i class="fa-solid fa-check"></i></div>
+        <h3 class="mt-3 text-success">Booking Confirmed!</h3>
+        <p class="text-muted">Your stay has been confirmed by the owner.</p>
+      </div>
+    <% } else if (booking.status === 'rejected') { %>
+      <div class="confirmation-reject text-center mb-4">
+        <div class="reject-circle"><i class="fa-solid fa-xmark"></i></div>
+        <h3 class="mt-3 text-danger">Booking Not Accepted</h3>
+        <p class="text-muted">The owner could not accept this request. Please try other dates.</p>
+      </div>
+    <% } else if (booking.status === 'cancelled') { %>
+      <div class="confirmation-reject text-center mb-4">
+        <div class="reject-circle"><i class="fa-solid fa-ban"></i></div>
+        <h3 class="mt-3 text-secondary">Booking Cancelled</h3>
+      </div>
+    <% } else { %>
+      <div class="confirmation-pending text-center mb-4">
+        <div class="pending-circle"><i class="fa-solid fa-clock"></i></div>
+        <h3 class="mt-3">Booking Request Submitted</h3>
+        <p class="text-muted"><%= booking.paymentConfirmed ? 'Payment confirmed. Awaiting owner approval.' : 'Please confirm your booking by completing the payment step below.' %></p>
+      </div>
+    <% } %>
+
+    <div class="booking-details-grid">
+      <div class="booking-detail-item">
+        <span class="detail-label">Property</span>
+        <span class="detail-value fw-600"><%= booking.listing.title %></span>
+      </div>
+      <div class="booking-detail-item">
+        <span class="detail-label">Location</span>
+        <span class="detail-value"><%= booking.listing.location %></span>
+      </div>
+      <div class="booking-detail-item">
+        <span class="detail-label">Check-In</span>
+        <span class="detail-value"><%= new Date(booking.checkIn).toDateString() %></span>
+      </div>
+      <div class="booking-detail-item">
+        <span class="detail-label">Check-Out</span>
+        <span class="detail-value"><%= new Date(booking.checkOut).toDateString() %></span>
+      </div>
+      <div class="booking-detail-item">
+        <span class="detail-label">Guests</span>
+        <span class="detail-value"><%= booking.guests %></span>
+      </div>
+      <div class="booking-detail-item">
+        <span class="detail-label">Status</span>
+        <span class="detail-value">
+          <span class="status-badge status-<%= booking.status %>"><%= booking.status.charAt(0).toUpperCase() + booking.status.slice(1) %></span>
+        </span>
+      </div>
+      <div class="booking-detail-item">
+        <span class="detail-label">Payment</span>
+        <span class="detail-value">
+          <% if (booking.paymentConfirmed) { %>
+            <span class="text-success fw-600"><i class="fa-solid fa-circle-check me-1"></i>Confirmed</span>
+          <% } else { %>
+            <span class="text-warning fw-600"><i class="fa-solid fa-clock me-1"></i>Pending</span>
+          <% } %>
+        </span>
+      </div>
+      <div class="booking-detail-item">
+        <span class="detail-label">Total Amount</span>
+        <span class="detail-value fw-700 text-purple fs-5">₹<%= booking.totalAmount.toLocaleString("en-IN") %></span>
+      </div>
+    </div>
+
+    <% if (booking.specialRequests) { %>
+      <div class="mt-3 p-3 rounded-3" style="background:#f8f5ff;">
+        <strong>Special Requests:</strong> <%= booking.specialRequests %>
+      </div>
+    <% } %>
+
+    <div class="mt-4">
+      <% if (!booking.paymentConfirmed && booking.status === 'pending') { %>
+        <div class="payment-section">
+          <h5 class="mb-3"><i class="fa-solid fa-credit-card me-2 text-purple"></i>Confirm Your Booking</h5>
+          <p class="text-muted mb-3">Click below to confirm your booking. No payment details required — this reserves your spot.</p>
+          <div class="payment-summary-box mb-4">
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">Total to be paid</span>
+              <span class="fw-700 fs-5 text-purple">₹<%= booking.totalAmount.toLocaleString("en-IN") %></span>
+            </div>
+          </div>
+          <form method="POST" action="/bookings/<%= booking._id %>/pay">
+            <button type="submit" class="btn-book-now w-100">
+              <i class="fa-solid fa-check-circle me-2"></i>Confirm Booking & Payment
+            </button>
+          </form>
+        </div>
+      <% } else if (booking.status === 'pending') { %>
+        <div class="alert-available mb-3">
+          <i class="fa-solid fa-circle-check me-2"></i>Payment confirmed. Waiting for owner to review your booking.
+        </div>
+      <% } %>
+
+      <% if (booking.status === 'pending' || booking.status === 'confirmed') { %>
+        <form method="POST" action="/bookings/<%= booking._id %>/cancel" class="mt-3">
+          <button type="submit" class="btn-cancel-booking w-100" onclick="return confirm('Are you sure you want to cancel?')">
+            <i class="fa-solid fa-ban me-2"></i>Cancel Booking
+          </button>
+        </form>
+      <% } %>
+    </div>
+
+    <div class="mt-4 text-center">
+      <a href="/bookings" class="text-purple text-decoration-none">
+        <i class="fa-solid fa-arrow-left me-1"></i>View All My Bookings
+      </a>
+    </div>
+  </div>
+</div>

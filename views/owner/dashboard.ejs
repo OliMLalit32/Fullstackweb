@@ -1,0 +1,117 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="dashboard-page">
+  <div class="container-fluid py-4 px-4">
+    <div class="dashboard-header mb-4">
+      <div>
+        <h3><i class="fa-solid fa-gauge me-2 text-purple"></i>Owner Dashboard</h3>
+        <p class="text-muted mb-0">Welcome back, <%= currUser.fullName || currUser.username %>!</p>
+      </div>
+      <a href="/listings/new" class="btn-book-now">
+        <i class="fa-solid fa-plus me-2"></i>Add New Listing
+      </a>
+    </div>
+
+    <div class="stats-grid mb-5">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#f0e9ff;color:#7c3aed;"><i class="fa-solid fa-home"></i></div>
+        <div class="stat-value"><%= stats.totalListings %></div>
+        <div class="stat-label">Total Listings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7;color:#d97706;"><i class="fa-solid fa-calendar"></i></div>
+        <div class="stat-value"><%= stats.totalBookings %></div>
+        <div class="stat-label">Total Bookings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fce7f3;color:#db2777;"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-value"><%= stats.pendingBookings %></div>
+        <div class="stat-label">Pending Requests</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dcfce7;color:#16a34a;"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+        <div class="stat-value">₹<%= stats.totalRevenue.toLocaleString("en-IN") %></div>
+        <div class="stat-label">Total Revenue</div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="dashboard-section">
+          <h5 class="section-title"><i class="fa-solid fa-list me-2"></i>My Listings</h5>
+          <% if (listings.length === 0) { %>
+            <div class="empty-state-sm text-center py-4">
+              <p class="text-muted">No listings yet.</p>
+              <a href="/listings/new" class="btn-primary-pill">Add First Listing</a>
+            </div>
+          <% } else { %>
+            <div class="owner-listings-list">
+              <% for (let l of listings) { %>
+                <div class="owner-listing-item">
+                  <img src="<%= l.image.url %>" alt="" class="owner-listing-thumb">
+                  <div class="flex-fill">
+                    <div class="fw-600"><%= l.title %></div>
+                    <div class="text-muted small"><%= l.location %></div>
+                    <div class="text-purple fw-600">₹<%= l.price.toLocaleString("en-IN") %>/night</div>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <a href="/listings/<%= l._id %>/edit" class="btn-icon-sm" title="Edit"><i class="fa-solid fa-pen"></i></a>
+                    <a href="/listings/<%= l._id %>" class="btn-icon-sm" title="View"><i class="fa-solid fa-eye"></i></a>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="dashboard-section">
+          <h5 class="section-title"><i class="fa-solid fa-calendar-alt me-2"></i>Booking Requests</h5>
+          <% if (bookings.length === 0) { %>
+            <div class="text-center py-4">
+              <p class="text-muted">No booking requests yet.</p>
+            </div>
+          <% } else { %>
+            <div class="bookings-table-wrap">
+              <% for (let b of bookings) { %>
+                <div class="owner-booking-card">
+                  <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-1">
+                    <div>
+                      <div class="fw-600"><%= b.listing ? b.listing.title : 'Listing' %></div>
+                      <div class="text-muted small">
+                        by <strong><%= b.client ? (b.client.fullName || b.client.username) : 'Client' %></strong>
+                      </div>
+                    </div>
+                    <span class="status-badge status-<%= b.status %>"><%= b.status %></span>
+                  </div>
+                  <div class="booking-dates mb-2">
+                    <i class="fa-solid fa-calendar text-purple me-1"></i>
+                    <%= new Date(b.checkIn).toDateString() %> → <%= new Date(b.checkOut).toDateString() %>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span class="fw-700 text-purple">₹<%= b.totalAmount.toLocaleString("en-IN") %></span>
+                    <% if (b.status === 'pending' && b.paymentConfirmed) { %>
+                      <div class="d-flex gap-2">
+                        <form method="POST" action="/bookings/<%= b._id %>/owner-action">
+                          <input type="hidden" name="action" value="confirm">
+                          <button class="btn-confirm-sm">Confirm</button>
+                        </form>
+                        <form method="POST" action="/bookings/<%= b._id %>/owner-action">
+                          <input type="hidden" name="action" value="reject">
+                          <button class="btn-reject-sm">Reject</button>
+                        </form>
+                      </div>
+                    <% } else if (b.status === 'pending' && !b.paymentConfirmed) { %>
+                      <span class="text-muted small"><i class="fa-solid fa-clock me-1"></i>Awaiting payment</span>
+                    <% } %>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

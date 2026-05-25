@@ -1,0 +1,232 @@
+<% layout("/layouts/boilerplate") %>
+
+<script>
+  const mapToken = '<%= mapToken %>';
+  const listing = <%- JSON.stringify(listing) %>;
+</script>
+
+<div class="show-page container py-4">
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="show-img-wrap">
+        <img src="<%= listing.image.url %>" alt="<%= listing.title %>" class="show-img">
+        <% if (listing.features && listing.features.length > 0) { %>
+          <div class="show-features-overlay">
+            <% for (let f of listing.features) { %>
+              <span class="feature-pill"><%= f %></span>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="show-info-card">
+        <h2 class="show-title"><%= listing.title %></h2>
+        <div class="show-meta">
+          <span><i class="fa-solid fa-location-dot text-purple me-1"></i><%= listing.location %>, <%= listing.country %></span>
+          <span class="mx-2">·</span>
+          <span><i class="fa-solid fa-user me-1"></i>Hosted by <strong><%= listing.owner.username %></strong></span>
+        </div>
+
+        <div class="show-price-block">
+          <span class="show-price">₹<%= listing.price.toLocaleString("en-IN") %></span>
+          <span class="show-per-night">/ night</span>
+        </div>
+
+        <p class="show-desc"><%= listing.description %></p>
+
+        <% if (currUser && currUser.role === 'client') { %>
+          <a href="/listings/<%= listing._id %>/book" class="btn-book-now w-100 mt-2">
+            <i class="fa-solid fa-calendar-plus me-2"></i>Book Now
+          </a>
+        <% } else if (!currUser) { %>
+          <a href="/login" class="btn-book-now w-100 mt-2">
+            <i class="fa-solid fa-right-to-bracket me-2"></i>Login to Book
+          </a>
+        <% } else if (currUser.role === 'owner' && listing.owner._id.equals(currUser._id)) { %>
+          <div class="owner-actions mt-3 d-flex gap-2">
+            <a href="/listings/<%= listing._id %>/edit" class="btn-edit flex-fill">
+              <i class="fa-solid fa-pen me-1"></i>Edit Listing
+            </a>
+            <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" style="flex:1">
+              <button class="btn-delete w-100" onclick="return confirm('Delete this listing?')">
+                <i class="fa-solid fa-trash me-1"></i>Delete
+              </button>
+            </form>
+          </div>
+        <% } %>
+      </div>
+
+      <div class="show-map-card mt-3">
+        <h6 class="mb-3"><i class="fa-solid fa-map-pin me-2 text-purple"></i>Location</h6>
+        <div id="map" style="height:200px;border-radius:12px;"></div>
+      </div>
+
+      <div
+        class="show-chatbot-card mt-3"
+        data-listing-chatbot
+        data-listing-id="<%= listing._id %>"
+      >
+        <div class="chatbot-header">
+          <div>
+            <h5 class="mb-1"><i class="fa-solid fa-comments me-2 text-purple"></i>Ask ApnaGhar Assistant</h5>
+            <p class="chatbot-subtitle mb-0">
+              Get instant answers about this property and place your booking request right here.
+              <% if (chatVoiceEnabled) { %>
+                Murf voice replies are ready too.
+              <% } else { %>
+                Add your Murf API key to unlock voice replies.
+              <% } %>
+            </p>
+          </div>
+        </div>
+
+        <div class="chatbot-quick-actions">
+          <button type="button" class="chatbot-chip" data-chat-prompt="What is the price of this property?">Price</button>
+          <button type="button" class="chatbot-chip" data-chat-prompt="What amenities are available here?">Amenities</button>
+          <button type="button" class="chatbot-chip" data-chat-prompt="Is this property available?">Availability</button>
+          <button type="button" class="chatbot-chip" data-chat-prompt="How do I book this property?">Booking Help</button>
+        </div>
+
+        <div class="chatbot-messages" data-chat-messages>
+          <div class="chatbot-message-row chatbot-message-row--assistant">
+            <div class="chatbot-message-stack">
+              <div class="chatbot-bubble chatbot-bubble--assistant">
+                Ask me about rent, amenities, dates, or booking steps for <%= listing.title %>. I will answer based on the ApnaGhar data on this page.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <form class="chatbot-form" data-chat-form>
+          <input
+            type="text"
+            class="chatbot-input"
+            data-chat-input
+            placeholder="Ask about this property or how booking works..."
+            maxlength="250"
+          >
+          <button type="submit" class="chatbot-send-btn">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span>Send</span>
+          </button>
+        </form>
+
+        <p class="chatbot-status" data-chat-status>
+          <% if (chatVoiceEnabled) { %>
+            Use Play voice on assistant replies to hear Murf audio.
+          <% } else { %>
+            Voice replies will appear after <code>MURF_API_KEY</code> is added.
+          <% } %>
+        </p>
+
+        <div class="chatbot-booking-panel" data-chat-booking>
+          <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+            <div>
+              <h6 class="mb-1"><i class="fa-solid fa-calendar-check me-2 text-purple"></i>Quick Booking</h6>
+              <p class="chatbot-subtitle mb-0">Create the booking request without leaving this page.</p>
+            </div>
+            <% if (currUser && currUser.role === 'client') { %>
+              <span class="chatbot-booking-badge">Client booking enabled</span>
+            <% } %>
+          </div>
+
+          <% if (currUser && currUser.role === 'client') { %>
+            <form class="chatbot-booking-form" data-chat-booking-form>
+              <div class="chatbot-booking-grid">
+                <div class="chatbot-field">
+                  <label for="chatbot-check-in">Check-in</label>
+                  <input id="chatbot-check-in" type="date" name="checkIn" min="<%= new Date().toISOString().split('T')[0] %>" required>
+                </div>
+                <div class="chatbot-field">
+                  <label for="chatbot-check-out">Check-out</label>
+                  <input id="chatbot-check-out" type="date" name="checkOut" min="<%= new Date().toISOString().split('T')[0] %>" required>
+                </div>
+                <div class="chatbot-field">
+                  <label for="chatbot-guests">Guests</label>
+                  <input id="chatbot-guests" type="number" name="guests" min="1" max="10" value="1">
+                </div>
+                <div class="chatbot-field chatbot-field--full">
+                  <label for="chatbot-special-requests">Special requests</label>
+                  <textarea id="chatbot-special-requests" name="specialRequests" rows="3" placeholder="Anything the owner should know?"></textarea>
+                </div>
+              </div>
+              <button type="submit" class="btn-book-now w-100 mt-3">
+                <i class="fa-solid fa-bolt me-2"></i>Book From Chat
+              </button>
+            </form>
+          <% } else if (!currUser) { %>
+            <div class="chatbot-booking-note">
+              <p class="mb-3">Log in as a client to create a booking request from this assistant.</p>
+              <a href="/login" class="btn-book-now w-100">
+                <i class="fa-solid fa-right-to-bracket me-2"></i>Login to Book
+              </a>
+            </div>
+          <% } else { %>
+            <div class="chatbot-booking-note">
+              <p class="mb-0">Booking is available only for client accounts. Owners can manage listings and requests from the owner dashboard.</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-lg-7">
+      <% if (currUser) { %>
+        <div class="review-form-card">
+          <h5 class="mb-3"><i class="fa-solid fa-star me-2 text-yellow"></i>Leave a Review</h5>
+          <form action="/listings/<%= listing.id %>/reviews" method="POST" novalidate class="needs-validation">
+            <div class="mb-3">
+              <label class="form-label-modern">Rating</label>
+              <fieldset class="starability-slot">
+                <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked>
+                <input type="radio" id="first-rate1" name="review[rating]" value="1"><label for="first-rate1">1 star</label>
+                <input type="radio" id="first-rate2" name="review[rating]" value="2"><label for="first-rate2">2 stars</label>
+                <input type="radio" id="first-rate3" name="review[rating]" value="3"><label for="first-rate3">3 stars</label>
+                <input type="radio" id="first-rate4" name="review[rating]" value="4"><label for="first-rate4">4 stars</label>
+                <input type="radio" id="first-rate5" name="review[rating]" value="5"><label for="first-rate5">5 stars</label>
+              </fieldset>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-modern">Your Comment</label>
+              <textarea name="review[comment]" class="form-control-modern" rows="3" required placeholder="Share your experience..."></textarea>
+              <div class="invalid-feedback">Please write a review.</div>
+            </div>
+            <button class="btn-submit-review">Submit Review</button>
+          </form>
+        </div>
+      <% } %>
+
+      <% if (listing.reviews.length > 0) { %>
+        <div class="reviews-section mt-4">
+          <h5 class="mb-3"><i class="fa-solid fa-comments me-2 text-purple"></i>Reviews (<%= listing.reviews.length %>)</h5>
+          <div class="reviews-grid">
+            <% for (let review of listing.reviews) { %>
+              <div class="review-card">
+                <div class="review-header">
+                  <div class="reviewer-avatar"><%= review.author.username.charAt(0).toUpperCase() %></div>
+                  <div>
+                    <div class="reviewer-name"><%= review.author.username %></div>
+                    <p class="starability-result mb-0" data-rating="<%= review.rating %>"></p>
+                  </div>
+                </div>
+                <p class="review-text"><%= review.comment %></p>
+                <% if (currUser && review.author._id.equals(currUser._id)) { %>
+                  <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" class="mt-2">
+                    <button class="btn-delete-sm">Delete Review</button>
+                  </form>
+                <% } %>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<script src="/js/map.js"></script>
+<script src="/js/listing-chatbot.js"></script>

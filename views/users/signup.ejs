@@ -1,0 +1,115 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="auth-page">
+  <div class="auth-card auth-card-wide">
+    <div class="auth-header">
+      <div class="auth-logo">
+        <i class="fa-solid fa-house-chimney"></i>
+      </div>
+      <h2>Create Your Account</h2>
+      <p class="text-muted">Join ApnaGhar – find or list student-friendly rentals</p>
+    </div>
+
+    <div class="role-tabs mb-4">
+      <a href="/signup?role=client" class="role-tab <%= role !== 'owner' ? 'active' : '' %>">
+        <i class="fa-solid fa-user me-1"></i>I'm a Client
+      </a>
+      <a href="/signup?role=owner" class="role-tab <%= role === 'owner' ? 'active' : '' %>">
+        <i class="fa-solid fa-building me-1"></i>I'm an Owner
+      </a>
+    </div>
+
+    <% if (role === 'owner') { %>
+    <div class="role-info-banner owner-banner mb-4">
+      <i class="fa-solid fa-building me-2"></i>
+      <strong>Owner Account</strong> – List and manage your rental properties, accept bookings, and earn.
+    </div>
+    <% } else { %>
+    <div class="role-info-banner client-banner mb-4">
+      <i class="fa-solid fa-graduation-cap me-2"></i>
+      <strong>Client Account</strong> – Browse and book student-friendly rentals near your college.
+    </div>
+    <% } %>
+
+    <form action="/signup" method="POST" class="needs-validation auth-form" novalidate>
+      <input type="hidden" name="role" value="<%= role %>">
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group-modern mb-3">
+            <label class="form-label-modern">Full Name</label>
+            <div class="input-modern">
+              <i class="fa-solid fa-id-card input-icon"></i>
+              <input name="fullName" type="text" class="form-control-modern" placeholder="Your full name" required>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group-modern mb-3">
+            <label class="form-label-modern">Username</label>
+            <div class="input-modern">
+              <i class="fa-solid fa-at input-icon"></i>
+              <input name="username" type="text" class="form-control-modern" placeholder="Choose a username" required>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group-modern mb-3">
+            <label class="form-label-modern">Email Address</label>
+            <div class="input-modern">
+              <i class="fa-solid fa-envelope input-icon"></i>
+              <input name="email" type="email" class="form-control-modern" placeholder="you@example.com" required>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group-modern mb-3">
+            <label class="form-label-modern">Phone Number</label>
+            <div class="input-modern">
+              <i class="fa-solid fa-phone input-icon"></i>
+              <input name="phone" type="tel" class="form-control-modern" placeholder="Optional">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group-modern mb-4">
+        <label class="form-label-modern">Password</label>
+        <div class="input-modern">
+          <i class="fa-solid fa-lock input-icon"></i>
+          <input name="password" id="password" type="password" class="form-control-modern" placeholder="Choose a strong password" required minlength="6">
+          <button type="button" class="toggle-pwd" onclick="togglePwd('password')">
+            <i class="fa-solid fa-eye" id="eye-password"></i>
+          </button>
+        </div>
+        <small class="text-muted">Minimum 6 characters</small>
+      </div>
+
+      <button type="submit" class="btn-auth-primary w-100">
+        <i class="fa-solid fa-user-plus me-2"></i>
+        Create <%= role === 'owner' ? 'Owner' : 'Client' %> Account
+      </button>
+    </form>
+
+    <div class="auth-footer mt-4">
+      <p>Already have an account? <a href="/login?role=<%= role %>">Log in here</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePwd(id) {
+  const input = document.getElementById(id);
+  const icon = document.getElementById('eye-' + id);
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.replace('fa-eye', 'fa-eye-slash');
+  } else {
+    input.type = 'password';
+    icon.classList.replace('fa-eye-slash', 'fa-eye');
+  }
+}
+</script>

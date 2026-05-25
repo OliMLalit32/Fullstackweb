@@ -1,0 +1,114 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="dashboard-page">
+  <div class="container-fluid py-4 px-4">
+    <div class="dashboard-header mb-4">
+      <div>
+        <h3><i class="fa-solid fa-chart-pie me-2 text-purple"></i>Admin Dashboard</h3>
+        <p class="text-muted mb-0">System overview – All activity at a glance</p>
+      </div>
+    </div>
+
+    <div class="stats-grid mb-5">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#f0e9ff;color:#7c3aed;"><i class="fa-solid fa-home"></i></div>
+        <div class="stat-value"><%= stats.totalListings %></div>
+        <div class="stat-label">Total Listings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dbeafe;color:#2563eb;"><i class="fa-solid fa-users"></i></div>
+        <div class="stat-value"><%= stats.totalUsers %></div>
+        <div class="stat-label">Total Users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7;color:#d97706;"><i class="fa-solid fa-calendar"></i></div>
+        <div class="stat-value"><%= stats.totalBookings %></div>
+        <div class="stat-label">Total Bookings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dcfce7;color:#16a34a;"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+        <div class="stat-value">₹<%= stats.totalRevenue.toLocaleString("en-IN") %></div>
+        <div class="stat-label">Total Revenue</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fce7f3;color:#db2777;"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-value"><%= stats.pendingBookings %></div>
+        <div class="stat-label">Pending Bookings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#e0f2fe;color:#0891b2;"><i class="fa-solid fa-building"></i></div>
+        <div class="stat-value"><%= stats.owners %></div>
+        <div class="stat-label">Owners</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef9c3;color:#ca8a04;"><i class="fa-solid fa-user-graduate"></i></div>
+        <div class="stat-value"><%= stats.clients %></div>
+        <div class="stat-label">Clients</div>
+      </div>
+    </div>
+
+    <div class="admin-nav-cards mb-5">
+      <a href="/admin/listings" class="admin-nav-card">
+        <i class="fa-solid fa-home"></i>
+        <span>Manage Listings</span>
+      </a>
+      <a href="/admin/users" class="admin-nav-card">
+        <i class="fa-solid fa-users"></i>
+        <span>Manage Users</span>
+      </a>
+      <a href="/admin/bookings" class="admin-nav-card">
+        <i class="fa-solid fa-calendar-check"></i>
+        <span>All Bookings</span>
+      </a>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="dashboard-section">
+          <h5 class="section-title"><i class="fa-solid fa-calendar me-2"></i>Recent Bookings</h5>
+          <% if (recentBookings.length === 0) { %>
+            <p class="text-muted text-center py-4">No bookings yet.</p>
+          <% } else { %>
+            <% for (let b of recentBookings) { %>
+              <div class="owner-booking-card">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
+                  <div>
+                    <div class="fw-600"><%= b.listing ? b.listing.title : '—' %></div>
+                    <div class="text-muted small">Client: <%= b.client ? (b.client.fullName || b.client.username) : '—' %></div>
+                  </div>
+                  <span class="status-badge status-<%= b.status %>"><%= b.status %></span>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                  <span class="text-muted small"><%= new Date(b.checkIn).toDateString() %> → <%= new Date(b.checkOut).toDateString() %></span>
+                  <span class="fw-700 text-purple">₹<%= b.totalAmount.toLocaleString("en-IN") %></span>
+                </div>
+              </div>
+            <% } %>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="dashboard-section">
+          <h5 class="section-title"><i class="fa-solid fa-user-plus me-2"></i>Recent Users</h5>
+          <% if (recentUsers.length === 0) { %>
+            <p class="text-muted text-center py-4">No users yet.</p>
+          <% } else { %>
+            <% for (let u of recentUsers) { %>
+              <div class="owner-booking-card">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="user-avatar-sm"><%= (u.fullName || u.username).charAt(0).toUpperCase() %></div>
+                  <div class="flex-fill">
+                    <div class="fw-600"><%= u.fullName || u.username %></div>
+                    <div class="text-muted small"><%= u.email %></div>
+                  </div>
+                  <span class="role-badge-sm role-<%= u.role %>"><%= u.role %></span>
+                </div>
+              </div>
+            <% } %>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,104 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="form-page">
+  <div class="form-card">
+    <div class="form-card-header">
+      <h3><i class="fa-solid fa-pen-to-square me-2 text-purple"></i>Edit Listing</h3>
+      <p class="text-muted mb-0">Update your property details below.</p>
+    </div>
+
+    <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data">
+      <div class="row">
+        <div class="col-12 mb-3">
+          <label class="form-label-modern">Property Title *</label>
+          <div class="input-modern">
+            <i class="fa-solid fa-home input-icon"></i>
+            <input name="listing[title]" type="text" class="form-control-modern" value="<%= listing.title %>" required>
+          </div>
+        </div>
+
+        <div class="col-12 mb-3">
+          <label class="form-label-modern">Description *</label>
+          <textarea name="listing[description]" class="form-control-modern" rows="4" required><%= listing.description %></textarea>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label-modern">Price per Night (₹) *</label>
+          <div class="input-modern">
+            <i class="fa-solid fa-indian-rupee-sign input-icon"></i>
+            <input name="listing[price]" type="number" class="form-control-modern" value="<%= listing.price %>" required>
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label-modern">Country *</label>
+          <div class="input-modern">
+            <i class="fa-solid fa-globe input-icon"></i>
+            <input name="listing[country]" type="text" class="form-control-modern" value="<%= listing.country %>" required>
+          </div>
+        </div>
+
+        <div class="col-12 mb-3">
+          <label class="form-label-modern">Location / Address *</label>
+          <div class="input-modern">
+            <i class="fa-solid fa-location-dot input-icon"></i>
+            <input name="listing[location]" type="text" class="form-control-modern" value="<%= listing.location %>" required>
+          </div>
+        </div>
+
+        <div class="col-12 mb-4">
+          <label class="form-label-modern">Update Image</label>
+          <div class="current-img-preview mb-2">
+            <img src="<%= originalImageUrl %>" alt="Current" style="max-height:150px;border-radius:12px;">
+            <small class="d-block text-muted mt-1">Current image – upload a new one to replace</small>
+          </div>
+          <div class="file-upload-area" onclick="document.getElementById('imgInput').click()">
+            <i class="fa-solid fa-cloud-arrow-up upload-icon mb-2"></i>
+            <p class="mb-0">Click to upload new image</p>
+            <input id="imgInput" name="listing[image]" type="file" class="d-none" accept="image/*" onchange="previewImg(this)">
+          </div>
+          <div id="img-preview" class="mt-2 d-none">
+            <img id="preview-img" src="" alt="Preview" style="max-height:150px;border-radius:12px;">
+          </div>
+        </div>
+
+        <div class="col-12 mb-4">
+          <label class="form-label-modern">Features & Amenities</label>
+          <div class="features-grid">
+            <% const allFeatures = ["Wifi","Furnished","Private Kitchen","Attached Bathroom","Single Room","Double Sharing","Independent","Within 1km"]; %>
+            <% const featureIcons = {"Wifi":"fa-wifi","Furnished":"fa-couch","Private Kitchen":"fa-kitchen-set","Attached Bathroom":"fa-bath","Single Room":"fa-bed","Double Sharing":"fa-users","Independent":"fa-house-user","Within 1km":"fa-location-dot"}; %>
+            <% for (let feature of allFeatures) { %>
+              <label class="feature-checkbox-label">
+                <input type="checkbox" name="listing[features][]" value="<%= feature %>" class="feature-checkbox" <%= listing.features.includes(feature) ? "checked" : "" %>>
+                <div class="feature-box">
+                  <i class="fa-solid <%= featureIcons[feature] %>"></i>
+                  <span><%= feature %></span>
+                </div>
+              </label>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <button type="submit" class="btn-auth-primary">
+            <i class="fa-solid fa-save me-2"></i>Save Changes
+          </button>
+          <a href="/listings/<%= listing._id %>" class="btn-cancel ms-3">Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function previewImg(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('preview-img').src = e.target.result;
+      document.getElementById('img-preview').classList.remove('d-none');
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
