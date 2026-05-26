@@ -8,16 +8,13 @@ function getGeocodingClient() {
     return mbxGeocoding({ accessToken: mapToken });
 }
 
-// In controllers/listings.js
 
 module.exports.index = async (req, res) => {
-    // Destructure both search and feature from the query string
+    
     const { search, feature } = req.query;
-    let filter = {}; // Initialize an empty filter object
-
-    // 1. Add search condition if a search query exists
+    let filter = {}; 
     if (search) {
-        // This will find listings where the search term appears in the title, location, or country
+        
         filter.$or = [
             { title: { $regex: search, $options: "i" } },
             { location: { $regex: search, $options: "i" } },
@@ -25,17 +22,14 @@ module.exports.index = async (req, res) => {
         ];
     }
 
-    // 2. Add feature condition if a feature query exists
+    
     if (feature) {
-        // This combines with the search filter (e.g., search for "beach" in listings that have a "Pool")
+        
         filter.features = feature;
     }
-
-    // 3. Execute the query with the combined filter
     const allListings = await Listing.find(filter);
 
-    // 4. Render the page, passing the search term to the template
-    // This is useful for showing a "No results for..." message
+    
     res.render("./listings/index.ejs", { allListings, search });
 };
 
@@ -53,7 +47,6 @@ module.exports.showListing = async (req, res) => {
         req.flash("error", "Listing you requested for does not exist!");
         return res.redirect("/listings");
     }
-    // Add mapToken to the data being sent to the template
     res.render("listings/show.ejs", {
         listing,
         mapToken: process.env.MAP_TOKEN,
@@ -75,7 +68,6 @@ module.exports.createListing  =  async (req, res, next) =>{
 
         const listingData = req.body.listing;
 
-// ✅ Always normalize features
 if (!Array.isArray(listingData.features)) {
   listingData.features = listingData.features ? [listingData.features] : [];
 }
